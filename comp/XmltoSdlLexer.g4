@@ -1,4 +1,4 @@
-lexer grammar P;
+lexer grammar XmltoSdlLexer;
 
 S: [ \t\n\r]+ -> skip ;
 

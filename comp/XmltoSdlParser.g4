@@ -1,7 +1,7 @@
-parser grammar XmltoSdl;
+parser grammar XmltoSdlParser;
 
 options {
-	tokenVocab = P;
+	tokenVocab = XmltoSdlLexer;
 }
   
 airport   
