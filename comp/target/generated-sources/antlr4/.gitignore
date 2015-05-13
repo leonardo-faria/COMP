@@ -6,3 +6,11 @@
 /XmltoSdlBaseVisitor.java
 /XmltoSdlListener.java
 /XmltoSdlVisitor.java
+/XmltoSdlParser.java
+/XmltoSdlParser.tokens
+/XmltoSdlParserBaseListener.java
+/XmltoSdlParserBaseVisitor.java
+/XmltoSdlParserListener.java
+/XmltoSdlParserVisitor.java
+/XmltoSdlLexer.java
+/XmltoSdlLexer.tokens
