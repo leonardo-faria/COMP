@@ -1,193 +1,207 @@
 parser grammar XmltoSdl;
 
-options {tokenVocab= P;}
+options {
+	tokenVocab = P;
+}
+  
+airport   
+:
+	airport_open airport_content airport_close 
+;
 
- 
-region: REGION EQUALS QUOTE STRING48 QUOTE;
-country: COUNTRY EQUALS QUOTE STRING48 QUOTE;
-state: STATE EQUALS QUOTE STRING48 QUOTE;
-city: CITY EQUALS QUOTE STRING48 QUOTE;
-name: NAME EQUALS QUOTE STRING48 QUOTE; 
-lat: LAT EQUALS QUOTE COORD90 QUOTE;
-lon: LON EQUALS QUOTE COORD180 QUOTE;
-alt: ALT EQUALS QUOTE FLOAT (LENGTH_UNIT)? QUOTE;
-magvar: MAGVAR QUOTE EQUALS FLOAT360 QUOTE;
-ident: IDENT EQUALS QUOTE STRING4 QUOTE;
-airportTestRadius: ATR EQUALS QUOTE FLOAT (LENGTH_UNIT | NAUTICAL) QUOTE;
-trafficScallar: TRAFFICSCALLAR EQUALS QUOTE FLOAT1 QUOTE;
-com_frequency: FREQUENCY EQUALS QUOTE FREQUENCY_VAL QUOTE;
-com_type: TYPE EQUALS QUOTE COM_TYPE QUOTE;
+value
+:
+ '=' STRING 
+; // Our STRING is AttValue in spec
 
 
 
+airport_open: OPEN AIRPORT airport_atr CLOSE;
 
-airport: airport_open airport_content airport_close;
-airport_open: OPEN_TAG AIRPORT airport_atr CLOSE_TAG;
-airport_close: OPEN_TAG TAG_SLASH AIRPORT CLOSE_TAG;
+
+region: REGION value;
+country: COUNTRY value;
+state: STATE value;
+city: CITY value;
+name: NAME value; 
+lat: LAT value;
+lon: LON value;
+alt: ALT value;
+magvar: MAGVAR value;
+ident: IDENT value;
+airportTestRadius: ATR value;
+trafficScallar: TRAFFICSCALLAR value;
+com_frequency: FREQUENCY value;
+com_type: TYPE value;
+
+
+
+
+airport_close: OPEN SLASH AIRPORT CLOSE;
 airport_atr: region? country? state? city? name? lat lon alt magvar? ident airportTestRadius trafficScallar;
 
 airport_content: ( tower | services | com | runway | runwayAlias | (taxiwayPoint taxiwayParking taxiName taxiwayPath) | helipad)*;
 
-tower: OPEN_TAG TOWER lat lon alt TAG_SLASH CLOSE_TAG;
+tower: OPEN TOWER lat lon alt SLASH_CLOSE;
 
-
+ 
 services: services_open services_content services_close;
-services_open: OPEN_TAG SERVICES CLOSE_TAG;
-services_close: OPEN_TAG TAG_SLASH SERVICES CLOSE_TAG;
+services_open: OPEN SERVICES CLOSE;
+services_close: OPEN SLASH SERVICES CLOSE;
 
 services_content: (fuel)*;
-fuel: OPEN_TAG FUEL fuel_type availability TAG_SLASH CLOSE_TAG;
-fuel_type  :  TYPE EQUALS QUOTE FUEL_TYPE QUOTE;
-availability: AVAILABILITY EQUALS QUOTE FUEL_AVAILABILITY QUOTE;
+fuel : OPEN FUEL fuel_type availability SLASH_CLOSE;
+fuel_type  :  TYPE value;
+availability: AVAILABILITY value;
 
 
 
-com: OPEN_TAG COM com_frequency com_type name TAG_SLASH CLOSE_TAG;
+com  :  OPEN COM com_frequency com_type name SLASH_CLOSE;
 
-
+ 
 
 runway: runway_open runway_content runway_close;
-runway_open: OPEN_TAG RUNWAY runway_atr CLOSE_TAG;
-runway_close: OPEN_TAG TAG_SLASH RUNWAY CLOSE_TAG;
+runway_open: OPEN RUNWAY runway_atr CLOSE;
+runway_close: OPEN SLASH RUNWAY CLOSE;
 
 runway_atr: lat lon alt surface heading length width runway_number (designator | primaryDesignator | secondaryDesignator ) patternAltitude? primaryTakeoff? primaryLanding? primaryPattern? secondaryTakeoff? secondaryLanding? secondaryPattern? primaryMarkingBias secondaryMarkingBias;
-surface: SURFACE EQUALS QUOTE SURFACE_VAL QUOTE;
-heading: HEADING EQUALS QUOTE FLOATP360 QUOTE;
-length: LENGTH EQUALS QUOTE FLOAT (LENGTH_UNIT)? QUOTE;
-width: WIDTH EQUALS QUOTE FLOAT (LENGTH_UNIT)? QUOTE;
-runway_number: NUMBER EQUALS QUOTE RUNWAY_NUMBER QUOTE;
-designator: DESIGNATOR EQUALS QUOTE DESIGNATOR_VAL QUOTE;
-primaryDesignator: PRIMARYDESIGNATOR EQUALS QUOTE DESIGNATOR_VAL QUOTE;
-secondaryDesignator: SECONDARYDESIGNATOR EQUALS QUOTE DESIGNATOR_VAL QUOTE;
-patternAltitude: PATTERNALTITUDE EQUALS QUOTE FLOAT (LENGTH_UNIT)? QUOTE;
-primaryTakeoff: PRIMARYTAKEOFF EQUALS QUOTE BOOL_MODE BOOL QUOTE;
-primaryLanding: PRIMARYLANDING EQUALS QUOTE BOOL_MODE BOOL QUOTE;
-primaryPattern: PRIMARYPATTERN EQUALS QUOTE PATTERN QUOTE;
-secondaryTakeoff: SECONDARYTAKEOFF EQUALS QUOTE BOOL_MODE BOOL QUOTE;
-secondaryLanding: SECONDARYLANDING EQUALS QUOTE BOOL_MODE BOOL QUOTE;
-secondaryPattern: SECONDARYPATTERN EQUALS QUOTE PATTERN QUOTE;
-primaryMarkingBias: PRIMARYMARKINGBIAS EQUALS QUOTE FLOAT (LENGTH_UNIT | NAUTICAL) QUOTE;
-secondaryMarkingBias: SECONDARYMARKINGBIAS EQUALS QUOTE FLOAT (LENGTH_UNIT | NAUTICAL) QUOTE;
+surface: SURFACE value;
+heading: HEADING value;
+length: LENGTH value;
+width: WIDTH value;
+runway_number: NUMBER value;
+designator: DESIGNATOR value;
+primaryDesignator: PRIMARYDESIGNATOR value;
+secondaryDesignator: SECONDARYDESIGNATOR value;
+patternAltitude: PATTERNALTITUDE value;
+primaryTakeoff: PRIMARYTAKEOFF value;
+primaryLanding: PRIMARYLANDING value;
+primaryPattern: PRIMARYPATTERN value;
+secondaryTakeoff: SECONDARYTAKEOFF value;
+secondaryLanding: SECONDARYLANDING value;
+secondaryPattern: SECONDARYPATTERN value;
+primaryMarkingBias: PRIMARYMARKINGBIAS value;
+secondaryMarkingBias: SECONDARYMARKINGBIAS value;
 
 
 runway_content: (markings)* (lights)* (offsetThreshold)* (blastPad)* (overrun)* (approachLights)* (vasi)* (ils)* (runwayStart)*;
 
-markings: OPEN_TAG MARKINGS edges threshold fixedDistance touchdown dashes marking_ident precision edgePavement singleEnd primaryClosed secondaryClosed primaryStol secondaryStol TAG_SLASH CLOSE_TAG;
-edges: EDGES EQUALS QUOTE BOOL_MODE BOOL QUOTE;
-threshold: THRESHOLD EQUALS QUOTE BOOL_MODE BOOL QUOTE;
-fixedDistance: FIXEDDISTANCE EQUALS QUOTE BOOL_MODE BOOL QUOTE;
-touchdown: TOUCHDOWN EQUALS QUOTE BOOL_MODE BOOL QUOTE;
-dashes: DASHES EQUALS QUOTE BOOL_MODE BOOL QUOTE;
-marking_ident: MARKING_IDENT EQUALS QUOTE BOOL_MODE BOOL QUOTE;
-precision: PRECISION EQUALS QUOTE BOOL_MODE BOOL QUOTE;
-edgePavement: EDGEPAVEMENT EQUALS QUOTE BOOL_MODE BOOL QUOTE;
-singleEnd: SINGLEEND EQUALS QUOTE BOOL_MODE BOOL QUOTE;
-primaryClosed: PRIMARYCLOSED EQUALS QUOTE BOOL_MODE BOOL QUOTE;
-secondaryClosed: SECONDARYCLOSED EQUALS QUOTE BOOL_MODE BOOL QUOTE;
-primaryStol: PRIMARYSTOL EQUALS QUOTE BOOL_MODE BOOL QUOTE;
-secondaryStol: SECONDARYSTOL EQUALS QUOTE BOOL_MODE BOOL QUOTE;
+markings: OPEN MARKINGS edges threshold fixedDistance touchdown dashes marking_ident precision edgePavement singleEnd primaryClosed secondaryClosed primaryStol secondaryStol SLASH_CLOSE;
+edges: EDGES value;
+threshold: THRESHOLD value;
+fixedDistance: FIXEDDISTANCE value;
+touchdown: TOUCHDOWN value;
+dashes: DASHES value;
+marking_ident: MARKING_IDENT value;
+precision: PRECISION value;
+edgePavement: EDGEPAVEMENT value;
+singleEnd: SINGLEEND value;
+primaryClosed: PRIMARYCLOSED value;
+secondaryClosed: SECONDARYCLOSED value;
+primaryStol: PRIMARYSTOL value;
+secondaryStol: SECONDARYSTOL value;
+ 
+lights: OPEN LIGHTS center edge centerRed SLASH_CLOSE;
+center: CENTER value;
+edge: EDGE value;
+centerRed: CENTERRED value;
 
-lights: OPEN_TAG LIGHTS center edge centerRed TAG_SLASH CLOSE_TAG;
-center: CENTER EQUALS QUOTE LIGHT_MODE LIGHTS_VAL QUOTE;
-edge: EDGE EQUALS QUOTE LIGHT_MODE LIGHTS_VAL QUOTE;
-centerRed: CENTERRED EQUALS QUOTE BOOL_MODE BOOL QUOTE;
 
+offsetThreshold: OPEN OFFSETTHRESHOLD end length width? surface? SLASH_CLOSE;
+end: END value;
 
-offsetThreshold: OPEN_TAG OFFSETTHRESHOLD end length width? surface? TAG_SLASH CLOSE_TAG;
-end: END EQUALS QUOTE END_VAL QUOTE;
+blastPad: OPEN BLASTPAD end length width? surface? SLASH_CLOSE;
 
-blastPad: OPEN_TAG BLASTPAD end length width? surface? TAG_SLASH CLOSE_TAG;
+overrun: OPEN OVERRUN end length width? surface? SLASH_CLOSE;
 
-overrun: OPEN_TAG OVERRUN end length width? surface? TAG_SLASH CLOSE_TAG;
+approachLights: OPEN APPROACHLIGHTS end system? strobes? reil? touchdown? endlights? SLASH_CLOSE;
+system: SYSTEM value;
+strobes: STROBES value;
+reil: REIL value;
+endlights: ENDLIGHTS value;
 
-approachLights: OPEN_TAG APPROACHLIGHTS end system? strobes? reil? touchdown? endlights? TAG_SLASH CLOSE_TAG;
-system: SYSTEM EQUALS QUOTE SYSTEM_VAL QUOTE;
-strobes: STROBES EQUALS QUOTE INTP QUOTE;
-reil: REIL EQUALS QUOTE BOOL_MODE BOOL QUOTE;
-endlights: ENDLIGHTS EQUALS QUOTE BOOL_MODE BOOL QUOTE;
-
-vasi: OPEN_TAG VASI end vasi_type side biasX biasZ spacing pitch TAG_SLASH CLOSE_TAG;
-vasi_type: TYPE EQUALS QUOTE VASI_TYPE_VAL QUOTE;
-side: SIDE EQUALS QUOTE PATTERN QUOTE;
-biasX: BIASX EQUALS QUOTE FLOAT (LENGTH_UNIT)? QUOTE;
-biasZ: BIASZ EQUALS QUOTE FLOAT (LENGTH_UNIT)? QUOTE;
-spacing: SPACING EQUALS QUOTE FLOATP QUOTE;
-pitch: PITCH EQUALS QUOTE FLOATP10 QUOTE;
+vasi: OPEN VASI end vasi_type side biasX biasZ spacing pitch SLASH_CLOSE;
+vasi_type: TYPE value;
+side: SIDE value;
+biasX: BIASX value;
+biasZ: BIASZ value;
+spacing: SPACING value;
+pitch: PITCH value;
 
 
 ils: ils_open ils_content ils_close;
 
-ils_open: OPEN_TAG ILS lat lon alt heading frequency end (range)? magvar ident (width)? (name)? (backCourse)? CLOSE_TAG;
-frequency: FREQUENCY EQUALS QUOTE FREQUENCY_VAL QUOTE;
-range: RANGE EQUALS QUOTE FLOAT (LENGTH_UNIT | NAUTICAL)? QUOTE;
-backCourse: BACKCOURSE EQUALS QUOTE BOOL_MODE BOOL QUOTE;
+ils_open: OPEN ILS lat lon alt heading frequency end (range)? magvar ident (width)? (name)? (backCourse)? CLOSE;
+frequency: FREQUENCY value;
+range: RANGE value;
+backCourse: BACKCOURSE value;
 
 ils_content: (glideScope)* (dme)* (visualModel)*;
-glideScope: OPEN_TAG GLIDESCOPE lat lon alt pitch range TAG_SLASH CLOSE_TAG;
-dme: OPEN_TAG DME lat lon alt range TAG_SLASH CLOSE_TAG;
+glideScope: OPEN GLIDESCOPE lat lon alt pitch range SLASH_CLOSE;
+dme: OPEN DME lat lon alt range SLASH_CLOSE;
 
 visualModel: visualModel_open visualModel_content visualModel_close;
-visualModel_open: OPEN_TAG VISUALMODEL heading? imageComplexity? guid_name instanceId CLOSE_TAG;
-imageComplexity: IMAGECOMPLEXITY EQUALS QUOTE IMAGECOMPLEXITY_VAL QUOTE;
-guid_name: NAME EQUALS QUOTE GUID_NAME_VAL QUOTE;
-instanceId: INSTANCEID EQUALS QUOTE GUID_NAME_VAL QUOTE;
+visualModel_open: OPEN VISUALMODEL heading? imageComplexity? guid_name instanceId CLOSE;
+imageComplexity: IMAGECOMPLEXITY value;
+guid_name: NAME value;
+instanceId: INSTANCEID value;
 
 visualModel_content: (biasXYZ)*;
-biasXYZ: OPEN_TAG BIASXYZ biasX_xyz biasY_xyz biasZ_xyz TAG_SLASH CLOSE_TAG;
-biasX_xyz: BIASX EQUALS QUOTE FLOAT QUOTE;
-biasY_xyz: BIASY EQUALS QUOTE FLOAT QUOTE;
-biasZ_xyz: BIASZ EQUALS QUOTE FLOAT QUOTE;
-visualModel_close: OPEN_TAG TAG_SLASH VISUALMODEL CLOSE_TAG;
-ils_close: OPEN_TAG TAG_SLASH ILS CLOSE_TAG;
+biasXYZ: OPEN BIASXYZ biasX_xyz biasY_xyz biasZ_xyz SLASH_CLOSE;
+biasX_xyz: BIASX value;
+biasY_xyz: BIASY value;
+biasZ_xyz: BIASZ value;
+visualModel_close: OPEN SLASH VISUALMODEL CLOSE;
+ils_close: OPEN SLASH ILS CLOSE;
 
-runwayStart: OPEN_TAG RUNWAYSTART runway_type lat lon alt heading end TAG_SLASH CLOSE_TAG;
-runway_type: TYPE EQUALS QUOTE RUNWAY QUOTE;
+runwayStart: OPEN RUNWAYSTART runway_type lat lon alt heading end SLASH_CLOSE;
+runway_type: TYPE value;
 
-runwayAlias: OPEN_TAG RUNWAYALIAS runway_number designator TAG_SLASH CLOSE_TAG;
-
-
-
-helipad: OPEN_TAG HELIPAD lat lon alt surface heading length width helipad_type closed? transparent? red? green? blue? TAG_SLASH CLOSE_TAG;
-
-helipad_type: TYPE EQUALS QUOTE HELIPAD_TYPE QUOTE;
-closed: CLOSED EQUALS QUOTE BOOL_MODE BOOL QUOTE;
-transparent: TRANSPARENT EQUALS QUOTE BOOL_MODE BOOL QUOTE;
-red: RED EQUALS QUOTE INTP255 QUOTE;
-green: GREEN EQUALS QUOTE INTP255 QUOTE;
-blue: BLUE EQUALS QUOTE INTP255 QUOTE;
+runwayAlias: OPEN RUNWAYALIAS runway_number designator SLASH_CLOSE;
 
 
-taxiwayPoint: OPEN_TAG TAXIWAYPOINT index taxiway_type orientation? ((lat lon) | (biasX_xyz biasZ_xyz)) TAG_SLASH CLOSE_TAG;
 
-index: INDEX EQUALS QUOTE INTP3999 QUOTE;
-taxiway_type: TYPE EQUALS QUOTE TAXIWAYTYPE_VAL QUOTE;
-orientation: ORIENTATION EQUALS QUOTE ORIENTATION_VAL QUOTE;
+helipad: OPEN HELIPAD lat lon alt surface heading length width helipad_type closed? transparent? red? green? blue? SLASH_CLOSE;
 
-taxiName: OPEN_TAG TAXINAME index255 taxi_name TAG_SLASH CLOSE_TAG;
-index255: INDEX EQUALS QUOTE INTP255 QUOTE;
-taxi_name: NAME EQUALS QUOTE STRINGN8 QUOTE;
-
-
-taxiwayPath: OPEN_TAG TAXIWAYPATH path_type path_start path_end width weightLimit surface drawSurface drawDetail (centerLine)? (centerLineLighted)? (leftEdge)? (leftEdgeLighted)? (rightEdge)? (rightEdgeLighted)? number designator path_name TAG_SLASH CLOSE_TAG;
-
-path_type:TYPE EQUALS QUOTE PATH_TYPE PATH_TYPE QUOTE;
-path_start:START EQUALS QUOTE INT QUOTE;
-path_end:END EQUALS QUOTE INT QUOTE;
-weightLimit:WHEIGHTLIMIT EQUALS QUOTE FLOAT QUOTE;
-drawSurface: DRAWSURFACE EQUALS QUOTE BOOL_MODE BOOL QUOTE;
-drawDetail: DRAWDETAIL EQUALS QUOTE BOOL_MODE BOOL QUOTE;
-centerLine:CENTERLINE EQUALS QUOTE BOOL_MODE BOOL QUOTE;
-centerLineLighted:CENTERLINELIGHTED EQUALS QUOTE BOOL_MODE BOOL QUOTE;
-leftEdge:LEFTEDGE EQUALS QUOTE EDGE_VAL QUOTE;
-leftEdgeLighted:LEFTEDGELIGHTED EQUALS QUOTE BOOL_MODE BOOL QUOTE;
-rightEdge:RIGHTEDGE EQUALS QUOTE EDGE_VAL QUOTE;
-rightEdgeLighted:RIGHTEDGELIGHTED EQUALS QUOTE BOOL_MODE BOOL QUOTE;
-number:NUMBER EQUALS QUOTE RUNWAY_NUMBER QUOTE;
-path_name:NAME EQUALS QUOTE INTP255 QUOTE;
+helipad_type: TYPE value;
+closed: CLOSED value;
+transparent: TRANSPARENT value;
+red: RED value;
+green: GREEN value;
+blue: BLUE value;
 
 
-taxiwayParking: OPEN_TAG TAXIWAYPARKING index (lat lon | biasX biasZ) heading radius parking_type parking_name number TAG_SLASH CLOSE_TAG;
+taxiwayPoint: OPEN TAXIWAYPOINT index taxiway_type orientation? ((lat lon) | (biasX_xyz biasZ_xyz)) SLASH_CLOSE;
 
-radius: RADIUS EQUALS QUOTE FLOAT QUOTE;
-parking_type: TYPE EQUALS QUOTE PARKING_TYPE QUOTE;
-parking_name: NAME EQUALS QUOTE PARKING_NAME QUOTE;
+index: INDEX value;
+taxiway_type: TYPE value;
+orientation: ORIENTATION value;
+
+taxiName: OPEN TAXINAME index255 taxi_name SLASH_CLOSE;
+index255: INDEX value;
+taxi_name: NAME value;
+
+
+taxiwayPath: OPEN TAXIWAYPATH path_type path_start path_end width weightLimit surface drawSurface drawDetail (centerLine)? (centerLineLighted)? (leftEdge)? (leftEdgeLighted)? (rightEdge)? (rightEdgeLighted)? number designator path_name SLASH_CLOSE;
+
+path_type:TYPE value;
+path_start:START value;
+path_end:END value;
+weightLimit:WHEIGHTLIMIT value;
+drawSurface: DRAWSURFACE value;
+drawDetail: DRAWDETAIL value;
+centerLine:CENTERLINE value;
+centerLineLighted:CENTERLINELIGHTED value;
+leftEdge:LEFTEDGE value;
+leftEdgeLighted:LEFTEDGELIGHTED value;
+rightEdge:RIGHTEDGE value;
+rightEdgeLighted:RIGHTEDGELIGHTED value;
+number:NUMBER value;
+path_name:NAME value;
+
+
+taxiwayParking: OPEN TAXIWAYPARKING index (lat lon | biasX biasZ) heading radius parking_type parking_name number SLASH_CLOSE;
+
+radius: RADIUS value;
+parking_type: TYPE value;
+parking_name: NAME value; 
